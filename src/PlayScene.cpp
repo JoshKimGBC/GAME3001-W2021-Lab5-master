@@ -11,6 +11,7 @@
 PlayScene::PlayScene()
 {
 	PlayScene::start();
+	
 }
 
 PlayScene::~PlayScene()
@@ -45,6 +46,8 @@ void PlayScene::clean()
 
 void PlayScene::handleEvents()
 {
+	
+
 	EventManager::Instance().update();
 
 	if (EventManager::Instance().isKeyDown(SDL_SCANCODE_ESCAPE))
@@ -74,17 +77,37 @@ void PlayScene::handleEvents()
 		m_shipIsMoving = true;
 	}
 
+	if (m_shipIsMoving) {
+		SoundManager::Instance().load("../Assets/audio/playerWalk.mp3", "walk", SOUND_SFX);
+		SoundManager::Instance().playSound("walk", 0, -1);
+	}
+
 	if (EventManager::Instance().isKeyDown(SDL_SCANCODE_G))
 	{
 		m_setGridEnabled(!m_getGridEnabled());
 	}
 	
+	if (CollisionManager::AABBCheck(m_pShip, m_pTarget))
+	{
+		SoundManager::Instance().load("../Assets/audio/targetReached.mp3", "target", SOUND_SFX);
+		SoundManager::Instance().playSound("target", 0, -1);
+	}
+
+	if (EventManager::Instance().isKeyDown(SDL_SCANCODE_H))
+	{
+		m_setGridEnabled(!m_getGridEnabled());
+		m_findShortestPath();
+	}
 }
 
 void PlayScene::start()
 {
 	// Set GUI Title
 	m_guiTitle = "Play Scene";
+
+
+	SoundManager::Instance().load("../Assets/audio/bgSong.mp3", "bg", SOUND_SFX);
+	SoundManager::Instance().playSound("bg", 1, -1);
 
 	m_buildGrid();
 	auto offset = glm::vec2(Config::TILE_SIZE * 0.5f, Config::TILE_SIZE * 0.5f);
@@ -104,6 +127,23 @@ void PlayScene::start()
 	m_getTile(15, 11)->setTileStatus(GOAL);
 	addChild(m_pTarget);
 
+	const SDL_Color blue = { 0, 0, 255, 255 };
+	m_pInstructionsLabel = new Label("Press F to find shortest path", "Consolas", 15, blue, glm::vec2(400.0f, 80.0f));
+	m_pInstructionsLabel->setParent(this);
+	addChild(m_pInstructionsLabel);
+
+	m_pInstructionsLabel = new Label("Press M to move to target", "Consolas", 15, blue, glm::vec2(400.0f, 100.0f));
+	m_pInstructionsLabel->setParent(this);
+	addChild(m_pInstructionsLabel);
+
+	m_pInstructionsLabel = new Label("Press G to open the grid", "Consolas", 15, blue, glm::vec2(400.0f, 120.0f));
+	m_pInstructionsLabel->setParent(this);
+	addChild(m_pInstructionsLabel);
+
+	m_pInstructionsLabel = new Label("Current Tile cost is", "Consolas", 15, blue, glm::vec2(400.0f, 140.0f));
+	m_pInstructionsLabel->setParent(this);
+	addChild(m_pInstructionsLabel);
+
 	m_computeTileCosts();
 	
 }
@@ -119,7 +159,7 @@ void PlayScene::GUI_Function()
 	// See examples by uncommenting the following - also look at imgui_demo.cpp in the IMGUI filter
 	//ImGui::ShowDemoWindow();
 	
-	ImGui::Begin("GAME3001 - Lab 5", NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar);
+	ImGui::Begin("A3", NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar);
 
 	static bool isGridEnabled = false;
 	if(ImGui::Checkbox("Grid Enabled", &isGridEnabled))
