@@ -140,7 +140,11 @@ void PlayScene::start()
 	m_pInstructionsLabel->setParent(this);
 	addChild(m_pInstructionsLabel);
 
-	m_pInstructionsLabel = new Label("Current Tile cost is", "Consolas", 15, blue, glm::vec2(400.0f, 140.0f));
+	m_pInstructionsLabel = new Label("Press H to toggle into Debug View", "Consolas", 15, blue, glm::vec2(400.0f, 140.0f));
+	m_pInstructionsLabel->setParent(this);
+	addChild(m_pInstructionsLabel);
+
+	m_pInstructionsLabel = new Label("Current Tile cost is", "Consolas", 15, blue, glm::vec2(400.0f, 160.0f));
 	m_pInstructionsLabel->setParent(this);
 	addChild(m_pInstructionsLabel);
 
